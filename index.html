@@ -9,17 +9,19 @@
   <!-- PWA Meta -->
   <meta name="theme-color" content="#3b5bfd" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Study Timer" />
 
   <!-- Manifest -->
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/StudyTimer/manifest.json" />
 
-  <!-- Ícone para iOS -->
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <!-- Ícones -->
+  <link rel="icon" href="/StudyTimer/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/StudyTimer/icon-192.png" />
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/StudyTimer/style.css" />
 </head>
 <body>
 
@@ -74,18 +76,18 @@
   </div>
 
   <!-- Script principal -->
-  <script src="script.js"></script>
+  <script src="/StudyTimer/script.js"></script>
 
   <!-- Registro do Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js")
+        navigator.serviceWorker.register("/StudyTimer/service-worker.js")
           .then(reg => {
             console.log("Service Worker registrado com sucesso:", reg.scope);
           })
           .catch(err => {
-            console.log("Falha ao registrar Service Worker:", err);
+            console.error("Falha ao registrar Service Worker:", err);
           });
       });
     }
