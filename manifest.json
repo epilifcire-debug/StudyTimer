@@ -1,20 +1,22 @@
 {
+  "id": "/StudyTimer/",
   "name": "Study Timer",
   "short_name": "StudyTimer",
   "description": "Aplicativo de ciclos de estudo com timer e alarmes",
-  "start_url": "./index.html",
+  "start_url": "/StudyTimer/index.html",
+  "scope": "/StudyTimer/",
   "display": "standalone",
   "background_color": "#f2f4f8",
   "theme_color": "#3b5bfd",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/StudyTimer/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "/StudyTimer/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
