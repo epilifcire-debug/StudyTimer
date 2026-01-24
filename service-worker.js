@@ -1,4 +1,4 @@
-const CACHE_NAME = "study-timer-v2";
+const CACHE_NAME = "study-timer-v3";
 
 const FILES_TO_CACHE = [
   "./",
@@ -6,8 +6,11 @@ const FILES_TO_CACHE = [
   "./style.css",
   "./script.js",
   "./manifest.json",
+  "./service-worker.js",
+  "./alarm.mp3",          // 🔊 NOVO ARQUIVO DE ÁUDIO
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./favicon.ico"
 ];
 
 // Instala e cria cache
