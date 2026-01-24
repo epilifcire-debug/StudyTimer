@@ -8,7 +8,12 @@ let totalCycles = 4;
 let currentCycle = 1;
 
 let remainingSeconds = 0;
-let endTimestamp = null; // ⏱️ controle real de tempo
+let endTimestamp = null;
+
+// ⏸️ Transição entre estudo e descanso
+const TRANSITION_SECONDS = 10;
+let isInTransition = false;
+let transitionEndTimestamp = null;
 
 const timeDisplay = document.getElementById("time-display");
 const statusDisplay = document.querySelector(".status");
@@ -35,12 +40,11 @@ function unlockAudio() {
       alarm.pause();
       alarm.currentTime = 0;
       audioUnlocked = true;
-      console.log("Áudio desbloqueado");
     })
     .catch(() => {});
 }
 
-// Atualiza display a partir de remainingSeconds
+// Atualiza display
 function updateDisplayFromSeconds(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -48,7 +52,7 @@ function updateDisplayFromSeconds(seconds) {
     String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
 }
 
-// Lê SEMPRE os últimos valores digitados
+// Lê sempre os últimos valores digitados
 function readInputs() {
   studyMinutes = parseInt(studyInput.value) || 1;
   breakMinutes = parseInt(breakInput.value) || 1;
@@ -67,7 +71,6 @@ function setNewPeriod() {
     statusDisplay.textContent = "☕ Descansando";
   }
 
-  // Define timestamp real de término
   endTimestamp = Date.now() + remainingSeconds * 1000;
   updateDisplayFromSeconds(remainingSeconds);
 }
@@ -100,9 +103,13 @@ function playAlarm(message) {
 // Finaliza período atual
 function finishPeriod() {
   if (isStudyTime) {
-    playAlarm("⏰ Hora de descansar!");
-    isStudyTime = false;
+    // ⏸️ Fim do estudo → inicia pausa de 10 segundos
+    playAlarm("⏰ Estudo finalizado! Descanso começa em 10 segundos...");
+    isInTransition = true;
+    transitionEndTimestamp = Date.now() + TRANSITION_SECONDS * 1000;
+    statusDisplay.textContent = `⏸️ Preparando descanso... ${TRANSITION_SECONDS}`;
   } else {
+    // Fim do descanso → volta direto para estudo
     playAlarm("📚 Hora de voltar a estudar!");
     isStudyTime = true;
     currentCycle++;
@@ -113,19 +120,40 @@ function finishPeriod() {
       playAlarm("🎉 Sessão de estudos concluída!");
       return;
     }
-  }
 
-  setNewPeriod();
+    setNewPeriod();
+  }
 }
 
-// Loop baseado em timestamp real
+// Loop principal baseado em timestamp real
 function startRealTimerLoop() {
   if (timer) clearInterval(timer);
 
   timer = setInterval(() => {
-    if (!isRunning || !endTimestamp) return;
+    if (!isRunning) return;
 
     const now = Date.now();
+
+    // ⏸️ Período de transição (10s)
+    if (isInTransition && transitionEndTimestamp) {
+      const diffMs = transitionEndTimestamp - now;
+      let diffSeconds = Math.ceil(diffMs / 1000);
+
+      if (diffSeconds <= 0) {
+        // Fim da transição → começa descanso
+        isInTransition = false;
+        isStudyTime = false;
+        setNewPeriod();
+      } else {
+        statusDisplay.textContent = `⏸️ Preparando descanso... ${diffSeconds}`;
+        updateDisplayFromSeconds(0);
+      }
+      return;
+    }
+
+    // ⏱️ Período normal
+    if (!endTimestamp) return;
+
     const diffMs = endTimestamp - now;
     let diffSeconds = Math.ceil(diffMs / 1000);
 
@@ -137,6 +165,7 @@ function startRealTimerLoop() {
       remainingSeconds = diffSeconds;
       updateDisplayFromSeconds(diffSeconds);
     }
+
   }, 1000);
 }
 
@@ -151,7 +180,6 @@ function startTimer() {
   if (remainingSeconds === 0 || !endTimestamp) {
     setNewPeriod();
   } else {
-    // Retoma de onde parou
     endTimestamp = Date.now() + remainingSeconds * 1000;
   }
 
@@ -166,7 +194,6 @@ function pauseTimer() {
   clearInterval(timer);
   isRunning = false;
 
-  // Atualiza remainingSeconds com base no relógio real
   if (endTimestamp) {
     const diffMs = endTimestamp - Date.now();
     remainingSeconds = Math.max(0, Math.ceil(diffMs / 1000));
@@ -175,15 +202,16 @@ function pauseTimer() {
   statusDisplay.textContent += " (Pausado)";
 }
 
-// 🔁 Reset inteligente: volta para o ÚLTIMO valor digitado
+// 🔁 Reset volta para o ÚLTIMO tempo digitado
 function stopTimer() {
   clearInterval(timer);
   isRunning = false;
   isStudyTime = true;
+  isInTransition = false;
   currentCycle = 1;
   endTimestamp = null;
+  transitionEndTimestamp = null;
 
-  // Lê novamente os inputs atuais
   readInputs();
 
   remainingSeconds = studyMinutes * 60;
@@ -196,12 +224,12 @@ startBtn.addEventListener("click", startTimer);
 pauseBtn.addEventListener("click", pauseTimer);
 resetBtn.addEventListener("click", stopTimer);
 
-// Inicializa com os valores atuais dos inputs
+// Inicialização
 readInputs();
 remainingSeconds = studyMinutes * 60;
 updateDisplayFromSeconds(remainingSeconds);
 
-// Permissão de notificação
+// Permissão de notificações
 if ("Notification" in window && Notification.permission !== "granted") {
   Notification.requestPermission();
 }
