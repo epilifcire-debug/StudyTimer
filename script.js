@@ -20,9 +20,26 @@ const studyInput = document.getElementById("study-time");
 const breakInput = document.getElementById("break-time");
 const cyclesInput = document.getElementById("cycles");
 
-// Áudio simples de alarme
-const alarm = new Audio();
-alarm.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+// 🔊 Áudio real (arquivo físico)
+const alarm = new Audio("/StudyTimer/alarm.mp3");
+alarm.preload = "auto";
+let audioUnlocked = false;
+
+// 🔓 Desbloqueia áudio no primeiro clique do usuário
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  alarm.play()
+    .then(() => {
+      alarm.pause();
+      alarm.currentTime = 0;
+      audioUnlocked = true;
+      console.log("Áudio desbloqueado com sucesso");
+    })
+    .catch(err => {
+      console.log("Ainda não foi possível desbloquear áudio:", err);
+    });
+}
 
 // Atualiza display
 function updateDisplay() {
@@ -54,17 +71,20 @@ function sendNotification(message) {
   }
 }
 
-// Toca alarme + vibra + notifica
+// 🔔 Toca alarme + vibra + notifica
 function playAlarm(message) {
-  // Som
-  alarm.play().catch(() => {});
+  // 🔊 Som
+  alarm.currentTime = 0;
+  alarm.play().catch(err => {
+    console.log("Falha ao tocar som:", err);
+  });
 
-  // Vibração
+  // 📳 Vibração
   if ("vibrate" in navigator) {
-    navigator.vibrate([300, 150, 300]);
+    navigator.vibrate([500, 200, 500]);
   }
 
-  // Notificação em segundo plano
+  // 🔔 Notificação
   sendNotification(message);
 }
 
@@ -91,6 +111,9 @@ function finishPeriod() {
 
 // Inicia timer
 function startTimer() {
+  // 🔓 Passo crítico: desbloqueia áudio no clique do usuário
+  unlockAudio();
+
   if (isRunning) return;
 
   studyMinutes = parseInt(studyInput.value);
@@ -141,7 +164,7 @@ resetBtn.addEventListener("click", stopTimer);
 // Estado inicial
 timeDisplay.textContent = "25:00";
 
-// Pede permissão para notificações ao carregar
+// Permissão para notificações
 if ("Notification" in window && Notification.permission !== "granted") {
   Notification.requestPermission();
 }
