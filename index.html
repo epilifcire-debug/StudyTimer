@@ -45,17 +45,23 @@
 
         <div class="field">
           <label for="study-time">Tempo de estudo (min)</label>
-          <input type="number" id="study-time" value="25" min="1" max="120">
+          <input type="number" id="study-time" value="25" min="1" max="240">
         </div>
 
         <div class="field">
           <label for="break-time">Tempo de descanso (min)</label>
-          <input type="number" id="break-time" value="5" min="1" max="60">
+          <input type="number" id="break-time" value="5" min="1" max="120">
         </div>
 
         <div class="field">
           <label for="cycles">Ciclos</label>
-          <input type="number" id="cycles" value="4" min="1" max="20">
+          <input type="number" id="cycles" value="4" min="1" max="50">
+        </div>
+
+        <!-- 🆕 Campo de pausa configurável -->
+        <div class="field">
+          <label for="transition-time">Pausa entre estudo e descanso (seg)</label>
+          <input type="number" id="transition-time" value="10" min="0" max="300">
         </div>
 
       </section>
@@ -84,7 +90,7 @@
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("/StudyTimer/service-worker.js")
           .then(reg => {
-            console.log("Service Worker registrado com sucesso:", reg.scope);
+            console.log("Service Worker registrado:", reg.scope);
           })
           .catch(err => {
             console.error("Falha ao registrar Service Worker:", err);
